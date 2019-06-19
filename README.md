@@ -1,2 +1,2 @@
 # A_Star_MazeSolver
-A* pathfinder for PNG image in Python
+A* pathfinder for mazes made of PNG images in Python
