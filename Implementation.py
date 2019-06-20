@@ -2,6 +2,8 @@ import math
 from sys import argv
 from MazeGenerator import mazeGen
 from NodeClass import Node
+from datetime import datetime
+from PIL import Image
 
 
 class A_StarResult:
@@ -11,6 +13,10 @@ class A_StarResult:
 
 def euclideanDistance(point1,point2):
     return math.sqrt(math.pow(point1[0] - point2[0], 2) + math.pow(point1[1] - point2[1], 2))
+def  ManhattanDistance(point1,point2):
+    return abs(point1[0] - point2[0])+abs(point1[1] - point2[1])
+def costantDistanceZero(point1,point2):
+    return 0
 
 def getPath(destination,image):
     count=0
@@ -20,7 +26,7 @@ def getPath(destination,image):
         image.putpixel(destination.getXY(),(255,0,0))
         path.append(destination.getXY())
         destination=destination.getParent()
-    print("Costo del cammino:"+str(count))
+    print("Costo del cammino:"+str(count-1))
     path.reverse()
     return path
 
@@ -31,24 +37,24 @@ def moveNotWall(point,image,direction): #utilizzata per spostare end e start non
             point = (point[0] + direction, point[1])
         else:
             canStart = True
-    if(direction==-1):
-        print(point)
     return point
 
-def A_StarPathfind(image,start,endCoord,dim):
-    actual=start
-    image.putpixel(actual.getXY(), (255, 0, 0))
+def A_StarPathfind(image,start,endCoord,dim,hFun):
+    image.putpixel(start.getXY(), (255, 0, 0))
     openNodes = []
     openNodes.append(start)
     closedNodes = []
-    neighbors = []
-    actualCoord=actual.getXY()
-
+    startTime = datetime.now()
     while len(openNodes)!=0:
         neighbors = []
         actual=openNodes[0]
         if(actual.getXY()==endCoord):
+            print(len(openNodes))
+            print("GVALUE DEL NODO FINALE: "+str(actual.getGValue()))
             result= A_StarResult(getPath(actual,image),image)
+            endTime = datetime.now()
+            print("Tempo utilizzato:")
+            print(endTime-startTime)
             return result
 
         actualCoord = actual.getXY()
@@ -57,17 +63,17 @@ def A_StarPathfind(image,start,endCoord,dim):
         image.putpixel(actual.getXY(),(0,255,0))
         #un vicino è valido se: interno all'immagine, non è un muro, non è già stato chiuso
         if(actualCoord[0]  - 1 >=  0 and image.getpixel((actualCoord[0] - 1, actualCoord[1]))!=(0,0,0) and image.getpixel((actualCoord[0] - 1, actualCoord[1]))!=(0,255,0)):
-            neighbors.append(Node(actualCoord[0] - 1, actualCoord[1], actual, euclideanDistance(actualCoord, endCoord), actual.getGValue() + 1))
+            neighbors.append(Node(actualCoord[0] - 1, actualCoord[1], actual, hFun((actualCoord[0] - 1, actualCoord[1]), endCoord), actual.getGValue() + 1))
         if(actualCoord[0]  + 1 < dim and image.getpixel((actualCoord[0] + 1, actualCoord[1]))!=(0,0,0) and image.getpixel((actualCoord[0] + 1, actualCoord[1]))!=(0,255,0)):
-            neighbors.append(Node(actualCoord[0] + 1, actualCoord[1], actual, euclideanDistance(actualCoord, endCoord), actual.getGValue() + 1))
+            neighbors.append(Node(actualCoord[0] + 1, actualCoord[1], actual, hFun((actualCoord[0] + 1, actualCoord[1]), endCoord), actual.getGValue() + 1))
         if(actualCoord[1]  - 1 >= 0 and image.getpixel((actualCoord[0], actualCoord[1] - 1))!=(0,0,0) and image.getpixel((actualCoord[0], actualCoord[1] - 1))!=(0,255,0)):
-            neighbors.append(Node(actualCoord[0], actualCoord[1] - 1, actual, euclideanDistance(actualCoord, endCoord), actual.getGValue() + 1))
+            neighbors.append(Node(actualCoord[0], actualCoord[1] - 1, actual, hFun((actualCoord[0], actualCoord[1] - 1), endCoord), actual.getGValue() + 1))
         if (actualCoord[1] + 1 < dim and image.getpixel((actualCoord[0], actualCoord[1] + 1))!=(0,0,0) and image.getpixel((actualCoord[0], actualCoord[1] + 1))!=(0,255,0)):
-            neighbors.append(Node(actualCoord[0], actualCoord[1] + 1, actual, euclideanDistance(actualCoord, endCoord), actual.getGValue() + 1))
+            neighbors.append(Node(actualCoord[0], actualCoord[1] + 1, actual, hFun((actualCoord[0], actualCoord[1] + 1), endCoord), actual.getGValue() + 1))
         for neighbor in neighbors:
             if (image.getpixel(neighbor.getXY()) == (0, 0, 255)): #il nodo è già in frontiera => controllo il suo costo attuale
                 for node in openNodes:
-                    if(neighbor.getGValue()<node.getGValue()): #se il vicino è già in frontiera, ma con costo di cammino maggiore
+                    if(neighbor.getGValue()<node.getGValue() and neighbor.getXY()==node.getXY()): #se il vicino è già in frontiera, ma con costo di cammino maggiore
                         openNodes.remove(node)
                         openNodes.append(neighbor)
             else:
@@ -78,17 +84,34 @@ def A_StarPathfind(image,start,endCoord,dim):
     return result
 
 
+
+
+
+
+
 def main(dim):
-    image=mazeGen(dim) #generazione labirinto
+    #image=mazeGen(dim) #generazione labirinto
+    image=Image.open("creata.png")
+    imageEuClid=image.copy()
+    imageDij=image.copy()
     startCoord = (0,0)
     startCoord = moveNotWall(startCoord,image,+1)
     start = Node(startCoord[0],startCoord[1],None,euclideanDistance((0,0),(dim-1,dim-1)),0)
     endCoord = (dim-1,dim-1)
     endCoord = moveNotWall(endCoord,image,-1)
-    print(endCoord)
-    result=A_StarPathfind(image,start,endCoord,dim)
-    print(result.path)
-    result.image.save("SolvedMaze_" + str(dim) + "x" + str(dim) + ".png", "PNG")
+    resultEuclid=A_StarPathfind(imageEuClid,start,endCoord,dim,euclideanDistance)
+
+    #print("Path con h=euclidea")
+    #print(resultEuclid.path)
+
+    resultMan=A_StarPathfind(image,start,endCoord,dim,ManhattanDistance)
+    '''
+    print("Path Manhattan:")
+    print(resultMan.path)'''
+    resultDij = A_StarPathfind(imageDij, start, endCoord, dim,costantDistanceZero)
+    resultDij.image.save("SolvedMaze_" + str(dim) + "x" + str(dim) + "_Dij.png", "PNG")
+    resultEuclid.image.save("SolvedMaze_" + str(dim) + "x" + str(dim) + "_Euclidean.png", "PNG")
+    resultMan.image.save("SolvedMaze_" + str(dim) + "x" + str(dim) + "_Manhattan.png", "PNG")
 
 if __name__ == "__main__":
     script, dimension = argv
