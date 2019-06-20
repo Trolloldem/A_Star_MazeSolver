@@ -90,8 +90,7 @@ def A_StarPathfind(image,start,endCoord,dim,hFun):
 
 
 def main(dim):
-    #image=mazeGen(dim) #generazione labirinto
-    image=Image.open("creata.png")
+    image=mazeGen(dim) #generazione labirinto
     imageEuClid=image.copy()
     imageDij=image.copy()
     startCoord = (0,0)
