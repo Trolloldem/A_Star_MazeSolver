@@ -70,6 +70,22 @@ def A_StarPathfind(image,start,endCoord,dim,hFun):
             neighbors.append(Node(actualCoord[0], actualCoord[1] - 1, actual, hFun((actualCoord[0], actualCoord[1] - 1), endCoord), actual.getGValue() + 1))
         if (actualCoord[1] + 1 < dim and image.getpixel((actualCoord[0], actualCoord[1] + 1))!=(0,0,0) and image.getpixel((actualCoord[0], actualCoord[1] + 1))!=(0,255,0)):
             neighbors.append(Node(actualCoord[0], actualCoord[1] + 1, actual, hFun((actualCoord[0], actualCoord[1] + 1), endCoord), actual.getGValue() + 1))
+
+        #DIREZIONI DI TEST OBLIQUE
+        if (actualCoord[0] - 1 >= 0 and actualCoord[1] -1 >=0 and image.getpixel((actualCoord[0] - 1, actualCoord[1]-1)) != (0, 0, 0) and image.getpixel((actualCoord[0] - 1, actualCoord[1]-1)) != (0, 255, 0)):
+            if(not(image.getpixel((actualCoord[0] - 1, actualCoord[1]))==(0,0,0) and image.getpixel((actualCoord[0] , actualCoord[1]-1))==(0,0,0))):
+                neighbors.append(Node(actualCoord[0] - 1, actualCoord[1]-1, actual, hFun((actualCoord[0] -1, actualCoord[1]-1), endCoord),actual.getGValue() + 1))
+        if (actualCoord[0] + 1 < dim and actualCoord[1] +1 <dim and image.getpixel((actualCoord[0] + 1, actualCoord[1]+1)) != (0, 0, 0) and image.getpixel((actualCoord[0] + 1, actualCoord[1]+1)) != (0, 255, 0)):
+            if (not(image.getpixel((actualCoord[0] + 1, actualCoord[1])) == (0, 0, 0) and image.getpixel((actualCoord[0],actualCoord[1] + 1)) == (0, 0, 0))):
+                neighbors.append(Node(actualCoord[0] + 1, actualCoord[1]+ 1, actual, hFun((actualCoord[0] + 1, actualCoord[1]+1), endCoord),actual.getGValue() + 1))
+        if (actualCoord[0] - 1 >= 0 and actualCoord[1] +1< dim and image.getpixel((actualCoord[0] - 1, actualCoord[1]+1)) != (0, 0, 0) and image.getpixel((actualCoord[0] - 1, actualCoord[1]+1)) != (0, 255, 0)):
+            if (not(image.getpixel((actualCoord[0] - 1, actualCoord[1])) == (0, 0, 0) and image.getpixel((actualCoord[0],actualCoord[1] + 1)) == (0, 0, 0))):
+                neighbors.append(Node(actualCoord[0] - 1, actualCoord[1]+1, actual, hFun((actualCoord[0] - 1, actualCoord[1]+1), endCoord),actual.getGValue() + 1))
+        if (actualCoord[0] + 1 <dim and actualCoord[1] -1>=0 and image.getpixel((actualCoord[0] + 1, actualCoord[1]-1)) != (0, 0, 0) and image.getpixel((actualCoord[0] + 1, actualCoord[1]-1)) != (0, 255, 0)):
+            if (not(image.getpixel((actualCoord[0] + 1, actualCoord[1])) == (0, 0, 0) and image.getpixel((actualCoord[0],actualCoord[1] - 1)) == (0, 0, 0))):
+                neighbors.append(Node(actualCoord[0] + 1, actualCoord[1]-1, actual, hFun((actualCoord[0] + 1, actualCoord[1]-1), endCoord),actual.getGValue() + 1))
+
+        #FINE DIREZIONI DI TEST
         for neighbor in neighbors:
             if (image.getpixel(neighbor.getXY()) == (0, 0, 255)): #il nodo è già in frontiera => controllo il suo costo attuale
                 for node in openNodes:
@@ -91,6 +107,7 @@ def A_StarPathfind(image,start,endCoord,dim,hFun):
 
 def main(dim):
     image=mazeGen(dim) #generazione labirinto
+    #image=Image.open("critica2.png")
     imageEuClid=image.copy()
     imageDij=image.copy()
     startCoord = (0,0)
