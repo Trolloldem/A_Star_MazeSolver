@@ -150,7 +150,7 @@ if __name__ == "__main__":
     if args.type=="random" and args.dim!=None:
         print("Genero labirinto di dimensione:"+str(args.dim))
     if args.dim==None:
-        dim=0
+        args.dim=0
     main(args.dim,args.type)
 
 
