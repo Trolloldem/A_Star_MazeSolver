@@ -4,6 +4,7 @@ from MazeGenerator import mazeGen
 from NodeClass import Node
 from datetime import datetime
 from PIL import Image
+import argparse
 
 
 class A_StarResult:
@@ -105,9 +106,19 @@ def A_StarPathfind(image,start,endCoord,dim,hFun):
 
 
 
-def main(dim):
-    image=mazeGen(dim) #generazione labirinto
-    #image=Image.open("critica2.png")
+def main(dim,type):
+    if(type=="random"):
+        image=mazeGen(dim) #generazione labirinto
+    if(type=="critica"):
+        image=Image.open("critica.png")
+        dim=250
+    if (type == "empty"):
+        image = Image.open("empty.png")
+        dim=200
+    if (type == "example"):
+        image = Image.open("creata.png")
+        dim=200
+
     imageEuClid=image.copy()
     imageDij=image.copy()
     startCoord = (0,0)
@@ -130,8 +141,17 @@ def main(dim):
     resultMan.image.save("SolvedMaze_" + str(dim) + "x" + str(dim) + "_Manhattan.png", "PNG")
 
 if __name__ == "__main__":
-    script, dimension = argv
-    main(int(dimension))
+    argumentList = argv[1:]
+    parser = argparse.ArgumentParser(description='Genera e trova la soluzione del labirinto generato')
+    parser.add_argument('--dim',dest="dim", type=int,help='dimensione immagine')
+    parser.add_argument('type', metavar='tipo', type=str,
+                        help='Tipo di run: "random" per labirinto random, "empty" per immagine bianca, "critica" per immagine problematica, "example" per un\'immagine generica')
+    args = parser.parse_args()
+    if args.type=="random" and args.dim!=None:
+        print("Genero labirinto di dimensione:"+str(args.dim))
+    if args.dim==None:
+        dim=0
+    main(args.dim,args.type)
 
 
 
