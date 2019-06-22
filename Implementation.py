@@ -143,7 +143,7 @@ def main(dim,type):
 if __name__ == "__main__":
     argumentList = argv[1:]
     parser = argparse.ArgumentParser(description='Genera e trova la soluzione del labirinto generato')
-    parser.add_argument('--dim',dest="dim", type=int,help='dimensione immagine')
+    parser.add_argument('--dim','-d',dest="dim", type=int,help='dimensione immagine')
     parser.add_argument('type', metavar='tipo', type=str,
                         help='Tipo di run: "random" per labirinto random, "empty" per immagine bianca, "critica" per immagine problematica, "example" per un\'immagine generica')
     args = parser.parse_args()
