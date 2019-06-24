@@ -1,5 +1,6 @@
 import math
 from sys import argv
+from sys import exit
 from MazeGenerator import mazeGen
 from NodeClass import Node
 from datetime import datetime
@@ -27,7 +28,7 @@ def getPath(destination,image):
         image.putpixel(destination.getXY(),(255,0,0))
         path.append(destination.getXY())
         destination=destination.getParent()
-    print("Costo del cammino:"+str(count-1))
+    print("Numero nodi nel cammino:"+str(count-1))
     path.reverse()
     return path
 
@@ -50,12 +51,13 @@ def A_StarPathfind(image,start,endCoord,dim,hFun):
         neighbors = []
         actual=openNodes[0]
         if(actual.getXY()==endCoord):
-            print(len(openNodes))
-            print("GVALUE DEL NODO FINALE: "+str(actual.getGValue()))
             result= A_StarResult(getPath(actual,image),image)
             endTime = datetime.now()
             print("Tempo utilizzato:")
             print(endTime-startTime)
+            print("Nodi in frontiera: " + str(len(openNodes)))
+            print("Nodi esplorati: " + str(len(closedNodes)))
+            print("Costo del cammino: " + str(actual.getGValue()))
             return result
 
         actualCoord = actual.getXY()
@@ -75,16 +77,16 @@ def A_StarPathfind(image,start,endCoord,dim,hFun):
         #DIREZIONI DI TEST OBLIQUE
         if (actualCoord[0] - 1 >= 0 and actualCoord[1] -1 >=0 and image.getpixel((actualCoord[0] - 1, actualCoord[1]-1)) != (0, 0, 0) and image.getpixel((actualCoord[0] - 1, actualCoord[1]-1)) != (0, 255, 0)):
             if(not(image.getpixel((actualCoord[0] - 1, actualCoord[1]))==(0,0,0) and image.getpixel((actualCoord[0] , actualCoord[1]-1))==(0,0,0))):
-                neighbors.append(Node(actualCoord[0] - 1, actualCoord[1]-1, actual, hFun((actualCoord[0] -1, actualCoord[1]-1), endCoord),actual.getGValue() + 1))
+                neighbors.append(Node(actualCoord[0] - 1, actualCoord[1]-1, actual, hFun((actualCoord[0] -1, actualCoord[1]-1), endCoord),actual.getGValue() + euclideanDistance(actualCoord,(actualCoord[0] - 1, actualCoord[1]-1))))
         if (actualCoord[0] + 1 < dim and actualCoord[1] +1 <dim and image.getpixel((actualCoord[0] + 1, actualCoord[1]+1)) != (0, 0, 0) and image.getpixel((actualCoord[0] + 1, actualCoord[1]+1)) != (0, 255, 0)):
             if (not(image.getpixel((actualCoord[0] + 1, actualCoord[1])) == (0, 0, 0) and image.getpixel((actualCoord[0],actualCoord[1] + 1)) == (0, 0, 0))):
-                neighbors.append(Node(actualCoord[0] + 1, actualCoord[1]+ 1, actual, hFun((actualCoord[0] + 1, actualCoord[1]+1), endCoord),actual.getGValue() + 1))
+                neighbors.append(Node(actualCoord[0] + 1, actualCoord[1]+ 1, actual, hFun((actualCoord[0] + 1, actualCoord[1]+1), endCoord),actual.getGValue() + euclideanDistance(actualCoord,(actualCoord[0] + 1, actualCoord[1]+1))))
         if (actualCoord[0] - 1 >= 0 and actualCoord[1] +1< dim and image.getpixel((actualCoord[0] - 1, actualCoord[1]+1)) != (0, 0, 0) and image.getpixel((actualCoord[0] - 1, actualCoord[1]+1)) != (0, 255, 0)):
             if (not(image.getpixel((actualCoord[0] - 1, actualCoord[1])) == (0, 0, 0) and image.getpixel((actualCoord[0],actualCoord[1] + 1)) == (0, 0, 0))):
-                neighbors.append(Node(actualCoord[0] - 1, actualCoord[1]+1, actual, hFun((actualCoord[0] - 1, actualCoord[1]+1), endCoord),actual.getGValue() + 1))
+                neighbors.append(Node(actualCoord[0] - 1, actualCoord[1]+1, actual, hFun((actualCoord[0] - 1, actualCoord[1]+1), endCoord),actual.getGValue() + euclideanDistance(actualCoord,(actualCoord[0] - 1, actualCoord[1]+1))))
         if (actualCoord[0] + 1 <dim and actualCoord[1] -1>=0 and image.getpixel((actualCoord[0] + 1, actualCoord[1]-1)) != (0, 0, 0) and image.getpixel((actualCoord[0] + 1, actualCoord[1]-1)) != (0, 255, 0)):
             if (not(image.getpixel((actualCoord[0] + 1, actualCoord[1])) == (0, 0, 0) and image.getpixel((actualCoord[0],actualCoord[1] - 1)) == (0, 0, 0))):
-                neighbors.append(Node(actualCoord[0] + 1, actualCoord[1]-1, actual, hFun((actualCoord[0] + 1, actualCoord[1]-1), endCoord),actual.getGValue() + 1))
+                neighbors.append(Node(actualCoord[0] + 1, actualCoord[1]-1, actual, hFun((actualCoord[0] + 1, actualCoord[1]-1), endCoord),actual.getGValue() + euclideanDistance(actualCoord,(actualCoord[0] + 1, actualCoord[1]-1))))
 
         #FINE DIREZIONI DI TEST
         for neighbor in neighbors:
@@ -108,24 +110,36 @@ def A_StarPathfind(image,start,endCoord,dim,hFun):
 
 def main(dim,type):
     if(type=="random"):
+        specificName="random"
         image=mazeGen(dim) #generazione labirinto
     if(type=="critica"):
+        specificName = "critica"
         image=Image.open("critica.png")
         dim=250
     if (type == "empty"):
+        specificName = "empty"
         image = Image.open("empty.png")
         dim=200
     if (type == "example"):
+        specificName = "example"
         image = Image.open("creata.png")
         dim=200
+    if (type == "bench"):
+        specificName = "example"
+        image = Image.open("bench.png")
+        dim=820
+        startCoord = (210, 10)
+        endCoord = (800,805)
+
 
     imageEuClid=image.copy()
     imageDij=image.copy()
-    startCoord = (0,0)
-    startCoord = moveNotWall(startCoord,image,+1)
-    start = Node(startCoord[0],startCoord[1],None,euclideanDistance((0,0),(dim-1,dim-1)),0)
-    endCoord = (dim-1,dim-1)
+    if(type!="bench"):
+        startCoord = (0,0)
+        endCoord = (dim-1,dim-1)
     endCoord = moveNotWall(endCoord,image,-1)
+    startCoord = moveNotWall(startCoord, image, +1)
+    start = Node(startCoord[0], startCoord[1], None, euclideanDistance((0, 0), (dim - 1, dim - 1)), 0)
     resultEuclid=A_StarPathfind(imageEuClid,start,endCoord,dim,euclideanDistance)
 
     #print("Path con h=euclidea")
@@ -136,9 +150,9 @@ def main(dim,type):
     print("Path Manhattan:")
     print(resultMan.path)'''
     resultDij = A_StarPathfind(imageDij, start, endCoord, dim,costantDistanceZero)
-    resultDij.image.save("SolvedMaze_" + str(dim) + "x" + str(dim) + "_Dij.png", "PNG")
-    resultEuclid.image.save("SolvedMaze_" + str(dim) + "x" + str(dim) + "_Euclidean.png", "PNG")
-    resultMan.image.save("SolvedMaze_" + str(dim) + "x" + str(dim) + "_Manhattan.png", "PNG")
+    resultDij.image.save("SolvedMaze_"+specificName+"_"+ str(dim) + "x" + str(dim) + "_Dij.png", "PNG")
+    resultEuclid.image.save("SolvedMaze_" +specificName+"_"+ str(dim) + "x" + str(dim) + "_Euclidean.png", "PNG")
+    resultMan.image.save("SolvedMaze_" + specificName+"_"+str(dim) + "x" + str(dim) + "_Manhattan.png", "PNG")
 
 if __name__ == "__main__":
     argumentList = argv[1:]
@@ -149,6 +163,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.type=="random" and args.dim!=None:
         print("Genero labirinto di dimensione:"+str(args.dim))
+    if  args.type=="random" and args.dim==None:
+        print("Dimensione necessaria per labirinti random: -d <dimensione>")
+        exit()
     if args.dim==None:
         args.dim=0
     main(args.dim,args.type)
