@@ -108,7 +108,7 @@ def A_StarPathfind(image,start,endCoord,dim,hFun):
 
 
 
-def main(dim,type):
+def main(dim,type,show=False):
     if(type=="random"):
         specificName="random"
         image=mazeGen(dim) #generazione labirinto
@@ -141,25 +141,23 @@ def main(dim,type):
     startCoord = moveNotWall(startCoord, image, +1)
     start = Node(startCoord[0], startCoord[1], None, euclideanDistance((0, 0), (dim - 1, dim - 1)), 0)
     resultEuclid=A_StarPathfind(imageEuClid,start,endCoord,dim,euclideanDistance)
-
-    #print("Path con h=euclidea")
-    #print(resultEuclid.path)
-
     resultMan=A_StarPathfind(image,start,endCoord,dim,ManhattanDistance)
-    '''
-    print("Path Manhattan:")
-    print(resultMan.path)'''
     resultDij = A_StarPathfind(imageDij, start, endCoord, dim,costantDistanceZero)
     resultDij.image.save("SolvedMaze_"+specificName+"_"+ str(dim) + "x" + str(dim) + "_Dij.png", "PNG")
     resultEuclid.image.save("SolvedMaze_" +specificName+"_"+ str(dim) + "x" + str(dim) + "_Euclidean.png", "PNG")
     resultMan.image.save("SolvedMaze_" + specificName+"_"+str(dim) + "x" + str(dim) + "_Manhattan.png", "PNG")
+    if show:
+        resultDij.image.show()
+        resultMan.image.show()
+        resultEuclid.image.show()
 
 if __name__ == "__main__":
     argumentList = argv[1:]
     parser = argparse.ArgumentParser(description='Genera e trova la soluzione del labirinto generato')
     parser.add_argument('--dim','-d',dest="dim", type=int,help='dimensione immagine')
     parser.add_argument('type', metavar='tipo', type=str,
-                        help='Tipo di run: "random" per labirinto random, "empty" per immagine bianca, "critica" per immagine problematica, "example" per un\'immagine generica')
+                        help='Tipo di run: "random" per labirinto random, "empty" per immagine bianca, "critica" per immagine problematica, "example" per un\'immagine generica, "bench" per un\'immagine di benchmark')
+    parser.add_argument('--show','-s',help='Mostra le immagini a fine computazione',action="store_true")
     args = parser.parse_args()
     if args.type=="random" and args.dim!=None:
         print("Genero labirinto di dimensione:"+str(args.dim))
@@ -168,7 +166,9 @@ if __name__ == "__main__":
         exit()
     if args.dim==None:
         args.dim=0
-    main(args.dim,args.type)
+    if args.show:
+        print("L'immagine verrà visualizzata")
+    main(args.dim,args.type,args.show)
 
 
 
