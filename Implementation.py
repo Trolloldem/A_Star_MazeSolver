@@ -32,7 +32,6 @@ def getPath(destination,image):
         image.putpixel(destination.getXY(),(255,0,0))
         path.append(destination.getXY())
         destination=destination.getParent()
-    print("Numero nodi nel cammino:"+str(count))
     path.reverse()
     return path
 
@@ -45,7 +44,7 @@ def moveNotWall(point,image,direction): #utilizzata per spostare end e start non
             canStart = True
     return point
 
-def A_StarPathfind(image,start,endCoord,dim,hFun):
+def A_StarPathfind(image,start,endCoord,dim,hFun,run):
     image.putpixel(start.getXY(), (255, 0, 0))
     openNodes = []
     openNodes.append(start)
@@ -56,11 +55,12 @@ def A_StarPathfind(image,start,endCoord,dim,hFun):
         actual=openNodes[0]
         if(actual.getXY()==endCoord):
             endTime = datetime.now()
-            print("Tempo utilizzato:")
-            print(endTime-startTime)
-            print("Nodi in frontiera: " + str(len(openNodes)))
-            print("Nodi esplorati: " + str(len(closedNodes)+1))
-            print("Costo del cammino: " + str(actual.getGValue()))
+            if run==1:
+                print("Tempo utilizzato:")
+                print(endTime-startTime)
+                print("Nodi in frontiera: " + str(len(openNodes)))
+                print("Nodi esplorati: " + str(len(closedNodes)+1))
+                print("Costo del cammino: " + str(actual.getGValue()))
             result = A_StarResult(getPath(actual, image), image,len(closedNodes)+1,endTime-startTime,actual.getGValue())
             return result
 
@@ -159,17 +159,17 @@ def main(dim,type,run,show=False):
         startCoord = moveNotWall(startCoord, image, +1)
         start = Node(startCoord[0], startCoord[1], None, euclideanDistance((0, 0), (dim - 1, dim - 1)), 0)
 
-        resultEuclid=A_StarPathfind(imageEuClid,start,endCoord,dim,euclideanDistance)
+        resultEuclid=A_StarPathfind(imageEuClid,start,endCoord,dim,euclideanDistance,run)
         euclideanTimes.append(resultEuclid.timeUsed)
         euclideanNodes.append(resultEuclid.visitedNodes)
         euclideanLenPath.append(resultEuclid.pathCost)
 
-        resultMan=A_StarPathfind(image,start,endCoord,dim,ManhattanDistance)
+        resultMan=A_StarPathfind(image,start,endCoord,dim,ManhattanDistance,run)
         ManhattanTimes.append(resultMan.timeUsed)
         ManhattanNodes.append(resultMan.visitedNodes)
         ManhattanLenPath.append(resultMan.pathCost)
 
-        resultDij = A_StarPathfind(imageDij, start, endCoord, dim,costantDistanceZero)
+        resultDij = A_StarPathfind(imageDij, start, endCoord, dim,costantDistanceZero,run)
         DijTimes.append(resultDij.timeUsed)
         DijNodes.append(resultDij.visitedNodes)
         DijLenPath.append(resultDij.pathCost)
